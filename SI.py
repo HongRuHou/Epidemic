@@ -5,7 +5,7 @@ import time
 import matplotlib.pyplot as plt
 
 Node_num = 10000
-Coefficient = 1
+Coefficient = 0.8
 Link_p = Coefficient*np.log(Node_num)/Node_num
 
 BeginT = time.time()
@@ -21,15 +21,16 @@ print("1.Infected nodes are generated!")
 
 GenerateNodeT = time.time()
 
-# Initialize the state of the nodes, 0 denotes a healthy node while 1 denotes an infected node
-Node_state = np.zeros(Node_num).astype(np.int8)
-Node_state[Infected] = 1
+# Initialize the state of the nodes, 1 denotes a healthy node while 0 denotes an infected node
+Node_state = np.ones(Node_num).astype(np.int8)
+Node_state[Infected] = 0
 
 # Create the Random Graph
 er = nx.erdos_renyi_graph(Node_num, Link_p)
 ps = nx.shell_layout(er)
 
 while nx.is_connected(er) == False:
+    print("Fail to create!")
     er = nx.erdos_renyi_graph(Node_num, Link_p)
     ps = nx.shell_layout(er)
 
@@ -43,15 +44,11 @@ A = np.array(nx.adjacency_matrix(er).astype(np.int8).todense())
 print("3.Adjacent Matrix is prepared!")
 
 # Define the transmission probability
-Gamma = 1.0      # Transmission probability
-End_T = 1000
-End_times = End_T
+Gamma = 0.4      # Transmission probability
 Last_Infected = Infected_init_num
 
 ### Problem describe
 ### With the scale of the network increasing, the line is impossible to control
-
-
 # If the Infected number is less than the Node number, it means still remains improving
 while(len(Infected) < Node_num):
     Tmp = Infected
@@ -60,31 +57,29 @@ while(len(Infected) < Node_num):
     for infected_index in Infected:
         # Second transmit the virus on its neighbors
         # Try to accelerate with the numpy
-        for idx, Neighbor_Node in enumerate(A[infected_index]):
-            # If the link lies between Infected and neighbor
-            if Neighbor_Node == 1:
-            # If the neighbor is not infected, try to infected
-                if  Node_state[idx] == 0:
-                    y = random.random()
-                    if y < Gamma:
-                        Tmp.append(idx)
-                        Node_state[idx] = 1
-            Last_Infected = len(Tmp)
-    if(Last_Infected == len(Tmp)):
-        End_times = End_times - 1
-        print(End_times)
-        if(End_times <= 0):
-            break
-    else:
+
+        # Generate the array containing all the random seed's state
+        y = np.random.rand(Node_num)
+        y = y * Node_state
+        y = y * A[infected_index]
+
+        # Get the state of this iter
+        Infected_iter = np.array(np.intersect1d(np.where(y < Gamma)[0],np.where(y > 0)[0]))
+
+        # Refresh the spreading in real time
+        Node_state[Infected_iter] = 0
+
+        # Refresh the state of the nodes
+        Tmp = np.union1d(Infected_iter, Tmp)
+
         Infected = Tmp
-        End_times = End_T
 
 FinishT = time.time()
 
 print("Init the nodes cost : "+str(GenerateNodeT - BeginT))
-print("Gegerate Network cost : "+str(GenerateNetworkT- GenerateNodeT))
+print("Gegerate Network cost : "+str(GenerateNetworkT - GenerateNodeT))
 print("Calculation cost : "+str(FinishT - GenerateNetworkT))
 
-nx.draw(er, ps, with_labels = True, node_size = Node_num, font_size = 8, node_color = "#CCFFFF")
-nx.draw(er, ps, with_labels = True, node_size = Node_num, font_size = 8, node_color = "#ff3333", nodelist = Infected)
-plt.show()
+# nx.draw(er, ps, with_labels = True, node_size = Node_num, font_size = 8, node_color = "#CCFFFF")
+# nx.draw(er, ps, with_labels = True, node_size = Node_num, font_size = 8, node_color = "#ff3333", nodelist = Infected)
+# plt.show()
