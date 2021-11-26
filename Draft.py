@@ -3,83 +3,90 @@ import random
 import numpy as np
 import time
 import matplotlib.pyplot as plt
+from Network import *
 
-Node_num = 10000
-Coefficient = 0.8
-Link_p = Coefficient*np.log(Node_num)/Node_num
+"""
+Parameters
+----------
+1. G : Input Graph
+2. Infected : The ndarray including the nodes infected at first
+3. Gamma: Transmission probability
+4. Beta: Recovery probability
+5. Epoch : The iterations in total
+"""
+def Evolution(G, Infected, Gamma = 0.5, Beta = 0.50, Epoch = 20):
 
-BeginT = time.time()
+    # Get the number of the nodes
+    Node_num = len(G.nodes)
 
-# Generate the random infected node
-Infected_init_num = 10
-Infected = []
-while(len(Infected) < Infected_init_num):
-    x = random.randint(0, Node_num - 1)
-    if x not in Infected:
-        Infected.append(x)
-print("1.Infected nodes are generated!")
+    # Initialize the state of the nodes, 1 denotes a healthy node while 0 denotes an infected node
+    Node_state = np.ones(Node_num).astype(np.int8)
+    Node_state[Infected] = 0
 
-GenerateNodeT = time.time()
+    # Get the Adjacent matrix of the Graph
+    A = np.array(nx.adjacency_matrix(G).astype(np.int8).todense())
 
-# Initialize the state of the nodes, 1 denotes a healthy node while 0 denotes an infected node
-Node_state = np.ones(Node_num).astype(np.int8)
-Node_state[Infected] = 0
+    print("3.Adjacent Matrix is prepared!")
 
-# Create the Random Graph
-er = nx.erdos_renyi_graph(Node_num, Link_p)
-ps = nx.shell_layout(er)
+    x_label = []
+    Infected_label = []
+    Recovery_label = []
 
-while nx.is_connected(er) == False:
-    print("Fail to create!")
-    er = nx.erdos_renyi_graph(Node_num, Link_p)
-    ps = nx.shell_layout(er)
+    ### Problem describe
+    for i in range(1, Epoch):
 
-GenerateNetworkT = time.time()
+        x_label.append(i)
+        # Fisrt Control the recovery of the Node Infected
 
-print("2.Network is generated!")
+        # Deep copy of Node_state
+        Tmp_Node_state = Node_state.copy()
+        zero_pos = np.array(np.where(Tmp_Node_state == 0)[0])
+        one_pos = np.array(np.where(Tmp_Node_state == 1)[0])
 
-# Get the Adjacent matrix of the Graph
-A = np.array(nx.adjacency_matrix(er).astype(np.int8).todense())
+        Tmp_Node_state[zero_pos] = 1
+        Tmp_Node_state[one_pos] = 0
 
-print("3.Adjacent Matrix is prepared!")
+        x = np.random.rand(Node_num)
+        x = x * Tmp_Node_state
+        Recovry_iter = np.array(np.intersect1d(np.where(x < Beta)[0], np.where(x > 0)[0]))
 
-# Define the transmission probability
-Gamma = 0.4      # Transmission probability
-Last_Infected = Infected_init_num
+        #print("Recovery in this iter is : "+ str(len(Recovry_iter)))
+        Recovery_label.append(len(Recovry_iter))
 
-### Problem describe
-### With the scale of the network increasing, the line is impossible to control
-# If the Infected number is less than the Node number, it means still remains improving
-while(len(Infected) < Node_num):
-    Tmp = Infected
-    print("Curent Infected: "+str(len(Infected)))
-    # First Control the Node Infected
-    for infected_index in Infected:
-        # Second transmit the virus on its neighbors
-        # Try to accelerate with the numpy
+        Node_state[Recovry_iter] = 1
 
-        # Generate the array containing all the random seed's state
-        y = np.random.rand(Node_num)
-        y = y * Node_state
-        y = y * A[infected_index]
+        Infected = np.setdiff1d(Infected, Recovry_iter)
 
-        # Get the state of this iter
-        Infected_iter = np.array(np.intersect1d(np.where(y < Gamma)[0],np.where(y > 0)[0]))
+        Tmp = Infected.copy()
 
-        # Refresh the spreading in real time
-        Node_state[Infected_iter] = 0
+        # Second Control the Node Infected
+        for infected_index in Infected:
+            # Generate the array containing all the random seed's state
+            y = np.random.rand(Node_num)
+            y = y * Node_state
+            y = y * A[infected_index]
 
-        # Refresh the state of the nodes
-        Tmp = np.union1d(Infected_iter, Tmp)
+            # Get the state of this iter
+            Infected_iter = np.array(np.intersect1d(np.where(y < Gamma)[0],np.where(y > 0)[0]))
 
-        Infected = Tmp
+            # Refresh the spreading in real time
+            Node_state[Infected_iter] = 0
 
-FinishT = time.time()
+            # Refresh the state of the nodes
+            Tmp = np.union1d(Infected_iter, Tmp)
 
-print("Init the nodes cost : "+str(GenerateNodeT - BeginT))
-print("Gegerate Network cost : "+str(GenerateNetworkT - GenerateNodeT))
-print("Calculation cost : "+str(FinishT - GenerateNetworkT))
+        Infected = Tmp.copy()
+        Infected_label.append(len(Infected))
 
-# nx.draw(er, ps, with_labels = True, node_size = Node_num, font_size = 8, node_color = "#CCFFFF")
-# nx.draw(er, ps, with_labels = True, node_size = Node_num, font_size = 8, node_color = "#ff3333", nodelist = Infected)
-# plt.show()
+    plt.xlabel("Iteration")
+    plt.ylabel("Number")
+    plt.plot(x_label,Recovery_label,label="Infected")
+    plt.plot(x_label,Infected_label,label="Recovered")
+    plt.legend()
+    plt.savefig("output.jpg")
+
+if __name__ == '__main__':
+
+    G, Infected = ER_Network(Node_num = 1000, Coefficient = 1, Infected_init_num = 10)
+
+    Evolution(G = G, Infected = Infected, Gamma = 0.5, Beta = 0.5, Epoch = 50)

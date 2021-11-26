@@ -4,14 +4,14 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 
-Node_num = 10000
+Node_num = 1000
 Coefficient = 1
 Link_p = Coefficient*np.log(Node_num)/Node_num
 
 BeginT = time.time()
 
 # Generate the random infected node
-Infected_init_num = 100
+Infected_init_num = 10
 Infected = []
 while(len(Infected) < Infected_init_num):
     x = random.randint(0, Node_num - 1)
@@ -54,7 +54,7 @@ Infected_label = []
 Recovery_label = []
 
 ### Problem describe
-for i in range(1, 500):
+for i in range(1, 120):
 
     x_label.append(i)
     # Fisrt Control the recovery of the Node Infected
@@ -110,7 +110,7 @@ plt.ylabel("Number")
 plt.plot(x_label,Recovery_label,label="Infected")
 plt.plot(x_label,Infected_label,label="Recovered")
 plt.legend()
-plt.show()
+plt.savefig("output.jpg")
 
 # nx.draw(er, ps, with_labels = True, node_size = Node_num, font_size = 8, node_color = "#CCFFFF")
 # nx.draw(er, ps, with_labels = True, node_size = Node_num, font_size = 8, node_color = "#ff3333", nodelist = Infected)
