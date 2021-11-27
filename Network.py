@@ -7,20 +7,18 @@ import matplotlib.pyplot as plt
 """
 Function
 ----------
-This function aims to get an Network
+This function aims to get an ER Network
 
 Parameters
 ----------
-1. Kind : The kind of the network, including ER, WS, ...
-2. Node_num : The number of the network
-3. Coefficient: Coefficient of the Link probability
-4. Infected_init_num: The number of the vertices infected at first
-5. FilePath : The Path of the dataset
+1. Node_num : The number of the network
+2. Coefficient: Coefficient of the Link probability
+3. Infected_init_num: The number of the vertices infected at first
 """
 def ER_Network(Node_num = 1000, Coefficient = 1, Infected_init_num = 10):
 
     # Calculate the probability among vertices
-    Link_p = Coefficient * np.log(Node_num) / Node_num
+    Link_p = min(Coefficient * np.log(Node_num) / Node_num, 1)
 
     # Generate the random infected node
     Infected = []
@@ -41,5 +39,85 @@ def ER_Network(Node_num = 1000, Coefficient = 1, Infected_init_num = 10):
         ps = nx.shell_layout(G)
 
     print("2.Network is generated!")
+
+    G.name = "ER"
+
+    return G, Infected
+
+"""
+Function
+----------
+This function aims to get an WS Network
+
+Parameters
+----------
+1. Node_num : The number of the network
+2. Coefficient: Coefficient of the Link probability
+3. Infected_init_num: The number of the vertices infected at first
+4. Lower: The lower limit of the degree
+5. Upper: The upper limit of the degree
+"""
+def WS_Network(Node_num = 1000, Coefficient = 1, Infected_init_num = 10, Lower = 4, Upper = 20):
+
+    # Calculate the probability among vertices
+    Link_p = min(Coefficient * np.log(Node_num) / Node_num, 1.0)
+    Neighbor = max(min(Node_num // 10, Lower),Upper)
+
+    # Generate the random infected node
+    Infected = []
+    while (len(Infected) < Infected_init_num):
+        x = random.randint(0, Node_num - 1)
+        if x not in Infected:
+            Infected.append(x)
+
+    print("1.Infected nodes are generated!")
+
+    # Create the ER Graph
+    G = nx.random_graphs.watts_strogatz_graph(Node_num, Neighbor, Link_p)
+
+    while nx.is_connected(G) == False:
+        print("Fail to create!")
+        G = nx.random_graphs.watts_strogatz_graph(Node_num, Neighbor, Link_p)
+        ps = nx.shell_layout(G)
+
+    print("2.Network is generated!")
+
+    G.name = "WS"
+
+    return G, Infected
+
+"""
+Function
+----------
+This function aims to get an BA Network
+
+Parameters
+----------
+1. Node_num : The number of the network
+2. Edge_num: The edge added per round, nearly equals the half of the <k>
+3. Infected_init_num: The number of the vertices infected at first
+"""
+def BA_Network(Node_num = 1000, Edge_num = 1, Infected_init_num = 10):
+
+    # Generate the random infected node
+    Infected = []
+    while (len(Infected) < Infected_init_num):
+        x = random.randint(0, Node_num - 1)
+        if x not in Infected:
+            Infected.append(x)
+
+    print("1.Infected nodes are generated!")
+
+    # Create the ER Graph
+    G = nx.random_graphs.barabasi_albert_graph(Node_num, Edge_num)
+
+    while nx.is_connected(G) == False:
+        print("Fail to create!")
+        G = nx.random_graphs.barabasi_albert_graph(Node_num, Edge_num)
+        ps = nx.shell_layout(G)
+
+    print("2.Network is generated!")
+
+    G.name = "BA"
 
     return G, Infected
