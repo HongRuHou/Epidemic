@@ -14,7 +14,7 @@ Parameters
 4. Beta: Recovery probability
 5. Epoch : The iterations in total
 """
-def Evolution(G, Infected, Gamma = 0.5, Beta = 0.50, Epoch = 20):
+def Evolution_SIS(G, Infected, Gamma = 0.5, Beta = 0.50, Epoch = 20):
 
     # Get the number of the nodes
     Node_num = len(G.nodes)
@@ -83,10 +83,17 @@ def Evolution(G, Infected, Gamma = 0.5, Beta = 0.50, Epoch = 20):
     plt.plot(x_label,Recovery_label,label="Infected")
     plt.plot(x_label,Infected_label,label="Recovered")
     plt.legend()
-    plt.savefig("output.jpg")
+    plt.savefig("Output/"+str(G.name)+"/output.jpg")
 
 if __name__ == '__main__':
 
-    G, Infected = ER_Network(Node_num = 1000, Coefficient = 1, Infected_init_num = 10)
+    Kind = "BA"
 
-    Evolution(G = G, Infected = Infected, Gamma = 0.5, Beta = 0.5, Epoch = 50)
+    if Kind == "WS":
+        G, Infected = WS_Network(Node_num = 1000, Coefficient = 1, Infected_init_num = 10)
+    elif Kind == "ER":
+        G, Infected = ER_Network(Node_num = 1000, Coefficient = 1, Infected_init_num = 10)
+    elif Kind == "BA":
+        G, Infected = BA_Network(Node_num=1000, Edge_num = 10)
+
+    Evolution_SIS(G = G, Infected = Infected, Gamma = 0.5, Beta = 0.5, Epoch = 1000)
