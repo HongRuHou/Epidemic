@@ -4,82 +4,63 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 
-Node_num = 10000
-Coefficient = 0.8
-Link_p = Coefficient*np.log(Node_num)/Node_num
+"""
+Function
+----------
+This function aims to achieve the simulation of SI Model
 
-BeginT = time.time()
+Parameters
+----------
+1. G : Input Graph
+2. Infected : The ndarray including the nodes infected at first
+3. Gamma: Transmission probability
+4. Epoch : The iterations in total
+"""
+def Evolution_SI(G, Infected, Gamma = 0.5, Epoch = 20):
 
-# Generate the random infected node
-Infected_init_num = 10
-Infected = []
-while(len(Infected) < Infected_init_num):
-    x = random.randint(0, Node_num - 1)
-    if x not in Infected:
-        Infected.append(x)
-print("1.Infected nodes are generated!")
+    # Get the number of the nodes
+    Node_num = len(G.nodes)
 
-GenerateNodeT = time.time()
+    # Initialize the state of the nodes, 1 denotes a healthy node while 0 denotes an infected node
+    Node_state = np.ones(Node_num).astype(np.int8)
+    Node_state[Infected] = 0
 
-# Initialize the state of the nodes, 1 denotes a healthy node while 0 denotes an infected node
-Node_state = np.ones(Node_num).astype(np.int8)
-Node_state[Infected] = 0
+    # Get the Adjacent matrix of the Graph
+    A = np.array(nx.adjacency_matrix(G).astype(np.int8).todense())
 
-# Create the Random Graph
-er = nx.erdos_renyi_graph(Node_num, Link_p)
-ps = nx.shell_layout(er)
+    print("3.Adjacent Matrix is prepared!")
 
-while nx.is_connected(er) == False:
-    print("Fail to create!")
-    er = nx.erdos_renyi_graph(Node_num, Link_p)
-    ps = nx.shell_layout(er)
+    Infected_label = [len(Infected)]
 
-GenerateNetworkT = time.time()
+    ### Problem describe
+    for i in range(1, Epoch):
 
-print("2.Network is generated!")
+        Tmp = Infected.copy()
 
-# Get the Adjacent matrix of the Graph
-A = np.array(nx.adjacency_matrix(er).astype(np.int8).todense())
+        # First Control the Node Infected
+        for infected_index in Infected:
+            # Generate the array containing all the random seed's state
+            y = np.random.rand(Node_num)
+            y = y * Node_state
+            y = y * A[infected_index]
 
-print("3.Adjacent Matrix is prepared!")
+            # Get the state of this iter
+            Infected_iter = np.array(np.intersect1d(np.where(y < Gamma)[0],np.where(y > 0)[0]))
 
-# Define the transmission probability
-Gamma = 0.4      # Transmission probability
-Last_Infected = Infected_init_num
+            # Refresh the spreading in real time
+            Node_state[Infected_iter] = 0
 
-### Problem describe
-### With the scale of the network increasing, the line is impossible to control
-# If the Infected number is less than the Node number, it means still remains improving
-while(len(Infected) < Node_num):
-    Tmp = Infected
-    print("Curent Infected: "+str(len(Infected)))
-    # First Control the Node Infected
-    for infected_index in Infected:
-        # Second transmit the virus on its neighbors
-        # Try to accelerate with the numpy
+            # Refresh the state of the nodes
+            Tmp = np.union1d(Infected_iter, Tmp)
 
-        # Generate the array containing all the random seed's state
-        y = np.random.rand(Node_num)
-        y = y * Node_state
-        y = y * A[infected_index]
+        Infected = Tmp.copy()
+        Infected_label.append(len(Infected))
 
-        # Get the state of this iter
-        Infected_iter = np.array(np.intersect1d(np.where(y < Gamma)[0],np.where(y > 0)[0]))
+    # plt.xlabel("Iteration")
+    # plt.ylabel("Number")
+    # plt.plot(x_label,Infected_label,label="Infected")
+    # plt.legend()
+    # plt.savefig("Output/"+str(G.name)+"/output_SI.jpg")
+    # plt.close()
 
-        # Refresh the spreading in real time
-        Node_state[Infected_iter] = 0
-
-        # Refresh the state of the nodes
-        Tmp = np.union1d(Infected_iter, Tmp)
-
-        Infected = Tmp
-
-FinishT = time.time()
-
-print("Init the nodes cost : "+str(GenerateNodeT - BeginT))
-print("Gegerate Network cost : "+str(GenerateNetworkT - GenerateNodeT))
-print("Calculation cost : "+str(FinishT - GenerateNetworkT))
-
-# nx.draw(er, ps, with_labels = True, node_size = Node_num, font_size = 8, node_color = "#CCFFFF")
-# nx.draw(er, ps, with_labels = True, node_size = Node_num, font_size = 8, node_color = "#ff3333", nodelist = Infected)
-# plt.show()
+    return Infected_label
