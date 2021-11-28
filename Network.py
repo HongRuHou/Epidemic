@@ -121,3 +121,44 @@ def BA_Network(Node_num = 1000, Edge_num = 1, Infected_init_num = 10):
     G.name = "BA"
 
     return G, Infected
+
+
+"""
+Function
+----------
+This function aims to get an Network from the real dataset
+ 
+Parameters
+----------
+1. File_path : The Path of the dataset
+2. Infected_init_num: The number of the vertices infected at first
+"""
+def Real_Network(File_path, Infected_init_num = 10):
+
+    # Create the ScaleFree Graph
+    ID = []
+
+    G = nx.Graph()
+    for line in open(File_path):
+        strlist = line.split()
+        n1 = int(strlist[0])
+        n2 = int(strlist[1])
+        G.add_edges_from([(n1, n2)])  # G.add_edges_from([(n1, n2)])
+        ID.append(n1)
+        ID.append(n2)
+
+    ID = np.unique(ID)
+    # Generate the random infected node
+    Infected = []
+    while (len(Infected) < Infected_init_num):
+        x = random.randint(0, len(ID) - 1)
+        if ID[x] not in Infected:
+            Infected.append(ID[x])
+
+    print("1.Infected nodes are generated!")
+
+    print("2.Network is generated!")
+
+    G.name = "ScaleFree"
+
+    return G, Infected
