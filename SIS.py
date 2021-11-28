@@ -3,6 +3,7 @@ import random
 import numpy as np
 import time
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import MultipleLocator
 
 """
 Function
@@ -17,7 +18,7 @@ Parameters
 4. Beta: Recovery probability
 5. Epoch : The iterations in total
 """
-def Evolution_SIS(G, Infected, Gamma = 0.5, Beta = 0.50, Epoch = 20):
+def Evolution_SIS(G, Infected, Gamma = 0.5, Beta = 0.50, Epoch = 20, Drawing = False):
 
     # Get the number of the nodes
     Node_num = len(G.nodes)
@@ -31,9 +32,9 @@ def Evolution_SIS(G, Infected, Gamma = 0.5, Beta = 0.50, Epoch = 20):
 
     print("3.Adjacent Matrix is prepared!")
 
-    x_label = []
-    Infected_label = []
-    Recovery_label = []
+    x_label = [0]
+    Infected_label = [len(Infected)]
+    Recovery_label = [0]
 
     ### Problem describe
     for i in range(1, Epoch):
@@ -81,12 +82,18 @@ def Evolution_SIS(G, Infected, Gamma = 0.5, Beta = 0.50, Epoch = 20):
         Infected = Tmp.copy()
         Infected_label.append(len(Infected))
 
-    plt.xlabel("Iteration")
-    plt.ylabel("Number")
-    plt.plot(x_label,Recovery_label,label="Recovered")
-    plt.plot(x_label,Infected_label,label="Infected")
-    plt.legend()
-    plt.savefig("Output/"+str(G.name)+"/output_SIS.jpg")
-    plt.close()
+    if Drawing == True:
+        plt.xlabel("Iteration")
+        plt.ylabel("Number")
+        plt.plot(x_label,Recovery_label,label="Recovered")
+        plt.plot(x_label,Infected_label,label="Infected")
+
+        ax = plt.gca()
+        ax.xaxis.set_major_locator(MultipleLocator(1))
+        plt.xlim(-0.5, Epoch)
+
+        plt.legend()
+        plt.savefig("Output/"+str(G.name)+"/output_SIS.jpg")
+        plt.close()
 
     return Infected_label, Recovery_label

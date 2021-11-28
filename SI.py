@@ -3,6 +3,7 @@ import random
 import numpy as np
 import time
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import MultipleLocator
 
 """
 Function
@@ -16,7 +17,7 @@ Parameters
 3. Gamma: Transmission probability
 4. Epoch : The iterations in total
 """
-def Evolution_SI(G, Infected, Gamma = 0.5, Epoch = 20):
+def Evolution_SI(G, Infected, Gamma = 0.5, Epoch = 20, Drawing = False):
 
     # Get the number of the nodes
     Node_num = len(G.nodes)
@@ -30,11 +31,13 @@ def Evolution_SI(G, Infected, Gamma = 0.5, Epoch = 20):
 
     print("3.Adjacent Matrix is prepared!")
 
+    x_label = [0]
     Infected_label = [len(Infected)]
 
     ### Problem describe
     for i in range(1, Epoch):
 
+        x_label.append(i)
         Tmp = Infected.copy()
 
         # First Control the Node Infected
@@ -56,11 +59,17 @@ def Evolution_SI(G, Infected, Gamma = 0.5, Epoch = 20):
         Infected = Tmp.copy()
         Infected_label.append(len(Infected))
 
-    # plt.xlabel("Iteration")
-    # plt.ylabel("Number")
-    # plt.plot(x_label,Infected_label,label="Infected")
-    # plt.legend()
-    # plt.savefig("Output/"+str(G.name)+"/output_SI.jpg")
-    # plt.close()
+    if Drawing == True:
+        plt.xlabel("Iteration")
+        plt.ylabel("Number")
+        plt.plot(x_label,Infected_label,label="Infected")
+
+        ax = plt.gca()
+        ax.xaxis.set_major_locator(MultipleLocator(1))
+        plt.xlim(-0.5, Epoch)
+
+        plt.legend()
+        plt.savefig("Output/"+str(G.name)+"/output_SI.jpg")
+        plt.close()
 
     return Infected_label
