@@ -16,6 +16,7 @@ Parameters
 2. Infected : The ndarray including the nodes infected at first
 3. Gamma: Transmission probability
 4. Epoch : The iterations in total
+5. Drawing: Whether to draw the pic in this function
 """
 def Evolution_SI(G, Infected, Gamma = 0.5, Epoch = 20, Drawing = False):
 

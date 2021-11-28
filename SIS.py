@@ -17,6 +17,7 @@ Parameters
 3. Gamma: Transmission probability
 4. Beta: Recovery probability
 5. Epoch : The iterations in total
+6. Drawing: Whether to draw the pic in this function
 """
 def Evolution_SIS(G, Infected, Gamma = 0.5, Beta = 0.50, Epoch = 20, Drawing = False):
 
