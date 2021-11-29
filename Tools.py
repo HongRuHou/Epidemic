@@ -31,9 +31,8 @@ Parameters
 2. K : Ideal degree
 """
 def Degree_bias(G, K):
-    bias = abs(Degree(G, Print=True) - K) / K
+    bias = abs(Degree(G, Print=False) - K) / K
     return bias
-
 
 """
 Function
