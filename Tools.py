@@ -20,6 +20,16 @@ def Degree(G, Print = True):
         print(G.name + " :" + str(np.mean(np.array(G.degree), axis=0)[1]))
     return np.mean(np.array(G.degree), axis=0)[1]
 
+"""
+Function
+----------
+This function aims to calculate of bias among the average degree and the real degree
+
+Parameters
+----------
+1. G : Input Graph
+2. K : Ideal degree
+"""
 def Degree_bias(G, K):
     bias = abs(Degree(G, Print=True) - K) / K
     return bias
