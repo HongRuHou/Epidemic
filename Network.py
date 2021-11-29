@@ -12,13 +12,14 @@ This function aims to get an ER Network
 Parameters
 ----------
 1. Node_num : The number of the network
-2. Coefficient: Coefficient of the Link probability
+2. K: The average degree of the network
 3. Infected_init_num: The number of the vertices infected at first
 """
-def ER_Network(Node_num = 1000, Coefficient = 1, Infected_init_num = 10):
 
-    # Calculate the probability among vertices
-    Link_p = min(Coefficient * np.log(Node_num) / Node_num, 1)
+def ER_Network(Node_num = 1000, K = 20, Infected_init_num = 10):
+
+    # Calculate the Link_p
+    Link_p = K / Node_num
 
     # Generate the random infected node
     Infected = []
@@ -33,10 +34,10 @@ def ER_Network(Node_num = 1000, Coefficient = 1, Infected_init_num = 10):
     G = nx.erdos_renyi_graph(Node_num, Link_p)
     ps = nx.shell_layout(G)
 
-    while nx.is_connected(G) == False:
+    # Ensure the network is fully connected and the error of <k> is tolerable
+    while nx.is_connected(G) == False or Degree_bias(G, K) > 0.001:
         print("Fail to create!")
         G = nx.erdos_renyi_graph(Node_num, Link_p)
-        ps = nx.shell_layout(G)
 
     print("2.Network is generated!")
 
@@ -52,16 +53,12 @@ This function aims to get an WS Network
 Parameters
 ----------
 1. Node_num : The number of the network
-2. Coefficient: Coefficient of the Link probability
-3. Infected_init_num: The number of the vertices infected at first
-4. Lower: The lower limit of the degree
-5. Upper: The upper limit of the degree
+2. K: The average degree of the network
+3. Link_p: The reconnect probability
+4. Infected_init_num: The number of the vertices infected at first
+5. Lower: The lower limit of the degree
 """
-def WS_Network(Node_num = 1000, Coefficient = 1, Infected_init_num = 10, Lower = 4, Upper = 20):
-
-    # Calculate the probability among vertices
-    Link_p = min(Coefficient * np.log(Node_num) / Node_num, 1.0)
-    Neighbor = max(min(Node_num // 10, Lower),Upper)
+def WS_Network(Node_num = 1000, K = 20, Link_p = 0.5, Infected_init_num = 10, Lower = 4):
 
     # Generate the random infected node
     Infected = []
@@ -73,12 +70,12 @@ def WS_Network(Node_num = 1000, Coefficient = 1, Infected_init_num = 10, Lower =
     print("1.Infected nodes are generated!")
 
     # Create the ER Graph
-    G = nx.random_graphs.watts_strogatz_graph(Node_num, Neighbor, Link_p)
+    G = nx.random_graphs.watts_strogatz_graph(Node_num, K, Link_p)
 
-    while nx.is_connected(G) == False:
+    # Ensure the network is fully connected and the error of <k> is tolerable
+    while nx.is_connected(G) == False or Degree_bias(G, K) > 0.001:
         print("Fail to create!")
-        G = nx.random_graphs.watts_strogatz_graph(Node_num, Neighbor, Link_p)
-        ps = nx.shell_layout(G)
+        G = nx.random_graphs.watts_strogatz_graph(Node_num, K, Link_p)
 
     print("2.Network is generated!")
 
