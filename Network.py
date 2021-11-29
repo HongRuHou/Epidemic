@@ -3,6 +3,7 @@ import random
 import numpy as np
 import time
 import matplotlib.pyplot as plt
+from Tools import *
 
 """
 Function
@@ -56,9 +57,8 @@ Parameters
 2. K: The average degree of the network
 3. Link_p: The reconnect probability
 4. Infected_init_num: The number of the vertices infected at first
-5. Lower: The lower limit of the degree
 """
-def WS_Network(Node_num = 1000, K = 20, Link_p = 0.5, Infected_init_num = 10, Lower = 4):
+def WS_Network(Node_num = 1000, K = 20, Link_p = 0.5, Infected_init_num = 10):
 
     # Generate the random infected node
     Infected = []
