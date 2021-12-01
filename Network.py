@@ -15,9 +15,10 @@ Parameters
 1. Node_num : The number of the network
 2. K: The average degree of the network
 3. Infected_init_num: The number of the vertices infected at first
+4. Connectivity: Determine whether the ER network generated should be fully connected
 """
 
-def ER_Network(Node_num = 1000, K = 20, Infected_init_num = 10):
+def ER_Network(Node_num = 1000, K = 20, Infected_init_num = 10, Connectivity = True):
 
     # Calculate the Link_p
     Link_p = K / Node_num
@@ -36,9 +37,13 @@ def ER_Network(Node_num = 1000, K = 20, Infected_init_num = 10):
     ps = nx.shell_layout(G)
 
     # Ensure the network is fully connected and the error of <k> is tolerable
-    while nx.is_connected(G) == False or Degree_bias(G, K) > 0.001:
-        print("Fail to create!")
-        G = nx.erdos_renyi_graph(Node_num, Link_p)
+    if Connectivity == True:
+        while nx.is_connected(G) == False or Degree_bias(G, K) > 0.001:
+            #print("Fail to create!")
+            G = nx.erdos_renyi_graph(Node_num, Link_p)
+    else:
+        while Degree_bias(G, K) > 0.001:
+            G = nx.erdos_renyi_graph(Node_num, Link_p)
 
     print("2.Network is generated!")
 
@@ -74,7 +79,7 @@ def WS_Network(Node_num = 1000, K = 20, Link_p = 0.5, Infected_init_num = 10):
 
     # Ensure the network is fully connected and the error of <k> is tolerable
     while nx.is_connected(G) == False or Degree_bias(G, K) > 0.001:
-        print("Fail to create!")
+        #print("Fail to create!")
         G = nx.random_graphs.watts_strogatz_graph(Node_num, K, Link_p)
 
     print("2.Network is generated!")
@@ -109,7 +114,7 @@ def BA_Network(Node_num = 1000, Edge_num = 1, Infected_init_num = 10):
     G = nx.random_graphs.barabasi_albert_graph(Node_num, Edge_num)
 
     while nx.is_connected(G) == False:
-        print("Fail to create!")
+        #print("Fail to create!")
         G = nx.random_graphs.barabasi_albert_graph(Node_num, Edge_num)
         ps = nx.shell_layout(G)
 
