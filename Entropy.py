@@ -1,5 +1,7 @@
 import numpy as np
 import math
+import time
+from scipy.io import  loadmat
 from Network import *
 
 def CalLength(List):
@@ -8,15 +10,9 @@ def CalLength(List):
         _len = _len + len(str(l))
     return _len
 
-def Entropy(G):
+def Entropy(A):
 
-    Node_num = len(G)
-    A = np.array(nx.adjacency_matrix(G).astype(np.int8).todense())
-
-    # A = np.array([[0,1,1,0],
-    #               [1,0,1,1],
-    #               [1,1,0,0],
-    #               [0,1,0,0]])
+    Node_num = A.shape[0]
 
     # The data of the Entropy
     """
@@ -31,16 +27,14 @@ def Entropy(G):
 
     # Iteration for all of the nodes
     for k in range(0, Node_num):
-        # print("***************")
-        # print("Pk is :" + str(Pk))
+
+        print("Iter:" + str(k))
 
         # Get the first part of Pk
         Pk1 = Pk[0]
 
         # Get the v from Pk1
         v = Pk1[0]
-
-        # print("V is :" + str(v))
 
         # Calculate the P_(k-1) - v
         Pk_no_v = Pk
@@ -54,21 +48,17 @@ def Entropy(G):
             Pk_no_v[0] = Pk_no_v_first
 
         # Deep copy of Pk_no_v
-        Pk_1 = Pk_no_v.copy()
-
-        # print("Pk_1 is :" + str(Pk_1))
+        #Pk_1 = Pk_no_v.copy()
+        Pk_1 = Pk_no_v
 
         # Find the neighbors of v
         Neighbor_v = np.where(A[v] == 1)
 
         Pk = []
         for i in range(0, len(Pk_1)):
-            # print("---------------")
 
             # Get the content of Pk_1 in order
             U = Pk_1[i]
-
-            # print("U is :" + str(U))
 
             Neighbors_in_U = np.intersect1d(Neighbor_v, np.array(U))
 
@@ -76,56 +66,58 @@ def Entropy(G):
 
             # Change the neighbor's number into the binary format
             b = bin(len(Neighbors_in_U))[2:]
-            #print(bitMaxlen,b)
 
             # If the length of neighbor is 1
             if bitMaxlen == 1:
                 B2.append(b)
             else:
                 # If the length after alter the format is short , enlarging it
+                # Multiply is faster than for, while the data iteration is huge
                 if(len(b) < bitMaxlen):
-                    str_b = ""
-                    for j in range(0, bitMaxlen - len(b)):
-                        str_b = str_b + str(0)
-                    str_b = str_b + b
-                    b = str_b
+                    str_b = "0"*(bitMaxlen - len(b))
+                    b = str_b + b
                 B1.append(b)
-
-            # print("---------------")
 
             # If there is no neighbors in Pk_1[i]
             Pk_temp = []
             if(len(Neighbors_in_U) == 0):
                 Pk_temp.append(np.setdiff1d(U, Neighbors_in_U).tolist())
             elif (len(np.setdiff1d(U, Neighbors_in_U)) == 0):
-                Pk_temp.append(Neighbors_in_U.copy().tolist())
+                # Pk_temp.append(Neighbors_in_U.copy().tolist())
+                Pk_temp.append(Neighbors_in_U.tolist())
             else:
-                Pk_temp.append(Neighbors_in_U.copy().tolist())
+                # Pk_temp.append(Neighbors_in_U.copy().tolist())
+                # Pk_temp.append(np.setdiff1d(U, Neighbors_in_U).tolist())
+                Pk_temp.append(Neighbors_in_U.tolist())
                 Pk_temp.append(np.setdiff1d(U, Neighbors_in_U).tolist())
-
-            # print("Pk_temp : " + str(Pk_temp))
 
             for p in Pk_temp:
                 Pk.append(p)
 
-            # print("Pk : " + str(Pk))
+    Output = open('Output/Compression/output.txt', 'w')
+    Output.write("B1 is :" + str((B1))+"\n")
+    Output.write("B2 is :" + str((B2)) + "\n")
+    Output.write("B1 length is :" + str(CalLength(B1)) + "\n")
+    Output.write("B2 length is :" + str(CalLength(B2)) + "\n")
+    Output.write("Total length is :" + str(CalLength(B1) + CalLength(B2)) + "\n")
+    Output.close()
 
+def Reader(File_path):
 
-        # print("***************")
+    annots = loadmat(File_path)
 
-    print("B1 is :" + str(B1))
-    print("B2 is :" + str(B2))
-    print("Total length is :" + str(CalLength(B1)+CalLength(B2)))
+    A = np.array(annots.get('A').todense()).astype(np.int8)
+
+    G = nx.Graph(A)
+
+    return np.array(nx.adjacency_matrix(G).todense()).astype(np.int8)
 
 if __name__ == '__main__':
 
-    er = nx.erdos_renyi_graph(8, 0.2)
-    ps = nx.shell_layout(er)
+    File_path = 'Dataset/Compression/PPI.mat'
 
-    nx.draw(er, ps, with_labels=True, node_size=4, font_size=8, node_color="#CCFFFF")
+    A = Reader(File_path)
 
-    Entropy(er)
-
-    plt.show()
+    Entropy(A)
 
 
