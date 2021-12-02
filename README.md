@@ -1,5 +1,15 @@
 # Epidemic
 
+## Folder:
+
+### Dataset
+This Folder contains the dataset used
+
+### Output
+This Folder contains the output of the simulation
+
+## File:
+
 ### SI.py 
 This file contains the realization for the SI(Susceptible - Infected) Model
 
