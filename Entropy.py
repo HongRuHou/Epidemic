@@ -83,11 +83,8 @@ def Entropy(A):
             if(len(Neighbors_in_U) == 0):
                 Pk_temp.append(np.setdiff1d(U, Neighbors_in_U).tolist())
             elif (len(np.setdiff1d(U, Neighbors_in_U)) == 0):
-                # Pk_temp.append(Neighbors_in_U.copy().tolist())
                 Pk_temp.append(Neighbors_in_U.tolist())
             else:
-                # Pk_temp.append(Neighbors_in_U.copy().tolist())
-                # Pk_temp.append(np.setdiff1d(U, Neighbors_in_U).tolist())
                 Pk_temp.append(Neighbors_in_U.tolist())
                 Pk_temp.append(np.setdiff1d(U, Neighbors_in_U).tolist())
 
