@@ -10,7 +10,7 @@ def CalLength(List):
         _len = _len + len(str(l))
     return _len
 
-def Entropy(A):
+def Entropy(A, Log = False):
 
     Node_num = A.shape[0]
 
@@ -28,7 +28,7 @@ def Entropy(A):
     # Iteration for all of the nodes
     for k in range(0, Node_num):
 
-        print("Iter:" + str(k))
+        # print("Iter:" + str(k))
 
         # Get the first part of Pk
         Pk1 = Pk[0]
@@ -91,13 +91,16 @@ def Entropy(A):
             for p in Pk_temp:
                 Pk.append(p)
 
-    Output = open('Output/Compression/output.txt', 'w')
-    Output.write("B1 is :" + str((B1))+"\n")
-    Output.write("B2 is :" + str((B2)) + "\n")
-    Output.write("B1 length is :" + str(CalLength(B1)) + "\n")
-    Output.write("B2 length is :" + str(CalLength(B2)) + "\n")
-    Output.write("Total length is :" + str(CalLength(B1) + CalLength(B2)) + "\n")
-    Output.close()
+    if Log == True:
+        Output = open('Output/Compression/output.txt', 'w')
+        Output.write("B1 is :" + str((B1))+"\n")
+        Output.write("B2 is :" + str((B2)) + "\n")
+        Output.write("B1 length is :" + str(CalLength(B1)) + "\n")
+        Output.write("B2 length is :" + str(CalLength(B2)) + "\n")
+        Output.write("Total length is :" + str(CalLength(B1) + CalLength(B2)) + "\n")
+        Output.close()
+
+    return CalLength(B1) + CalLength(B2)
 
 def Reader(File_path):
 
@@ -116,5 +119,3 @@ if __name__ == '__main__':
     A = Reader(File_path)
 
     Entropy(A)
-
-
